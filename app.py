@@ -18,35 +18,30 @@ def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# ==== 饽饽山 10 个蠢驴，这里的 name 随便改成你们真实名字就行 ====
+# ==== 饽饽山 10 位成员：这里只改名字就行，avatar 先设为 None ====
 members = [
-    {"id": 1, "name": "劲神"},
-    {"id": 2, "name": "任某"},
-    {"id": 3, "name": "刘某"},
-    {"id": 4, "name": "宋子晗"},
-    {"id": 5, "name": "张钧皓"},
-    {"id": 6, "name": "张连健"},
-    {"id": 7, "name": "张珈宁"},
-    {"id": 8, "name": "张立苳"},
-    {"id": 9, "name": "王晓萱"},
-    {"id": 10, "name": "贝东营"},
+    {"id": 1, "name": "劲神",   "avatar": None},
+    {"id": 2, "name": "任某",   "avatar": None},
+    {"id": 3, "name": "刘某",   "avatar": None},
+    {"id": 4, "name": "宋子晗", "avatar": None},
+    {"id": 5, "name": "张钧皓", "avatar": None},
+    {"id": 6, "name": "张连健", "avatar": None},
+    {"id": 7, "name": "张珈宁", "avatar": None},
+    {"id": 8, "name": "张立苳", "avatar": None},
+    {"id": 9, "name": "王晓萱", "avatar": None},
+    {"id": 10, "name": "贝东莹", "avatar": None},
 ]
-# 👉 例如你可以改成：
-# members = [
-#     {"id": 1, "name": "小张"},
-#     {"id": 2, "name": "大王"},
-#     ...
-# ]
 
 
-# 评分统计
+# 评分统计：每个人的总分和次数
 member_stats = {
     m["id"]: {"total_score": 0, "rating_count": 0}
     for m in members
 }
 
 # 保存所有评价记录（目前只是内存，不写数据库）
-ratings = []  # 每条: {rater_id, target_id, score, comment}
+# 每条: {rater_id, target_id, score, comment}
+ratings = []
 
 
 def get_member(member_id: int):
@@ -95,9 +90,11 @@ def rate():
 
     comment = (data.get("comment") or "").strip()
 
-    if rater_id not in [m["id"] for m in members]:
+    member_ids = [m["id"] for m in members]
+
+    if rater_id not in member_ids:
         return jsonify({"error": "请选择你是哪头蠢驴"}), 400
-    if target_id not in [m["id"] for m in members]:
+    if target_id not in member_ids:
         return jsonify({"error": "请选择你要评价的那头蠢驴"}), 400
     if rater_id == target_id:
         return jsonify({"error": "不能给自己打分噢，做人要诚实 🫢"}), 400
