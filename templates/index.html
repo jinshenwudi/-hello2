@@ -2,112 +2,541 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>班级留言墙</title>
+    <title>饽饽山评分表</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #1f2933, #111827);
+            --card-bg: rgba(15, 23, 42, 0.9);
+            --accent: #f97316;
+            --accent-soft: rgba(249, 115, 22, 0.2);
+            --text-main: #f9fafb;
+            --text-sub: #9ca3af;
+            --border: rgba(148, 163, 184, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: sans-serif;
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 0 10px;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
         }
-        h1 {
+
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px 16px 40px;
+        }
+
+        header {
             text-align: center;
+            margin-bottom: 24px;
         }
-        .form-group {
+
+        h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            letter-spacing: 0.06em;
+        }
+
+        .subtitle {
+            margin-top: 8px;
+            color: var(--text-sub);
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid var(--border);
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--accent);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr);
+            gap: 18px;
+        }
+
+        @media (max-width: 800px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            padding: 16px 16px 18px;
+            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 10px;
         }
-        label {
-            display: block;
-            margin-bottom: 4px;
+
+        .card-title h2 {
+            margin: 0;
+            font-size: 1.05rem;
         }
-        input, textarea, button {
+
+        .card-title small {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+        }
+
+        .member-card {
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: radial-gradient(circle at top left, rgba(249, 115, 22, 0.15), rgba(15, 23, 42, 0.9));
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .member-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 999px;
+            overflow: hidden;
+            border: 2px solid rgba(249, 115, 22, 0.65);
+            background: radial-gradient(circle at 30% 30%, #f97316, #7c2d12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff7ed;
+        }
+
+        .avatar img {
             width: 100%;
-            box-sizing: border-box;
-            padding: 8px;
+            height: 100%;
+            object-fit: cover;
         }
+
+        .rank-tag {
+            font-size: 0.7rem;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            color: var(--text-sub);
+        }
+
+        .member-main {
+            min-width: 0;
+        }
+
+        .member-name-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 6px;
+            margin-bottom: 2px;
+        }
+
+        .member-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .member-score {
+            font-size: 0.95rem;
+        }
+
+        .member-score strong {
+            color: #fed7aa;
+            font-size: 1.1rem;
+        }
+
+        .score-bar {
+            margin-top: 4px;
+            width: 100%;
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.9);
+            overflow: hidden;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f97316, #facc15);
+            width: 0%;
+        }
+
+        .member-meta {
+            margin-top: 4px;
+            font-size: 0.78rem;
+            color: var(--text-sub);
+        }
+
+        .form-card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-bottom: 2px;
+            display: block;
+        }
+
+        select,
+        input[type="number"],
+        textarea,
+        input[type="file"] {
+            width: 100%;
+            font: inherit;
+            padding: 7px 9px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        select:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.5);
+        }
+
         textarea {
             resize: vertical;
-            min-height: 60px;
+            min-height: 70px;
         }
-        .message {
-            border: 1px solid #ddd;
-            padding: 8px;
-            margin-bottom: 8px;
-            border-radius: 4px;
+
+        .btn {
+            border: none;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 4px;
         }
-        .meta {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 4px;
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: #fff7ed;
+            box-shadow: 0 10px 20px rgba(248, 113, 22, 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 28px rgba(248, 113, 22, 0.5);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px dashed rgba(148, 163, 184, 0.7);
+            color: var(--text-sub);
+        }
+
+        .btn-ghost:hover {
+            border-style: solid;
+            color: var(--text-main);
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .muted {
+            font-size: 0.78rem;
+            color: var(--text-sub);
+        }
+
+        .status {
+            font-size: 0.8rem;
+            min-height: 16px;
+        }
+
+        .status.ok {
+            color: #bbf7d0;
+        }
+
+        .status.error {
+            color: #fecaca;
+        }
+
+        .hint {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            margin-top: -4px;
         }
     </style>
 </head>
 <body>
-    <h1>班级留言墙</h1>
+<div class="page">
+    <header>
+        <div class="badge">
+            <div class="badge-dot"></div>
+            饽饽山 · 小团体专用评分榜
+        </div>
+        <h1>饽饽山颜值 & 形象评分表</h1>
+        <div class="subtitle">
+            每人都可以给别人打 1–5 分，上传自己的头像，一起打造最有仪式感的团体排行榜 ✨
+        </div>
+    </header>
 
-    <div id="form">
-        <div class="form-group">
-            <label for="name">你的名字（可不填，默认为“匿名同学”）</label>
-            <input id="name" placeholder="比如：小明">
-        </div>
-        <div class="form-group">
-            <label for="text">留言内容</label>
-            <textarea id="text" placeholder="想说点什么？"></textarea>
-        </div>
-        <button id="submit">提交留言</button>
-        <p id="status" style="color:red;"></p>
+    <div class="layout">
+        <!-- 左侧：排行榜 -->
+        <section class="card">
+            <div class="card-title">
+                <h2>当前排行榜</h2>
+                <small>按照平均分从高到低排列</small>
+            </div>
+            <div class="board-grid">
+                {% for m in board %}
+                    <article class="member-card">
+                        <div class="member-left">
+                            <div class="avatar">
+                                {% if m.avatar %}
+                                    <img src="{{ m.avatar }}" alt="{{ m.name }}">
+                                {% else %}
+                                    <span>#{{ m.id }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="rank-tag">
+                                第 {{ loop.index }} 名
+                            </div>
+                        </div>
+                        <div class="member-main">
+                            <div class="member-name-row">
+                                <div class="member-name">{{ m.name }}</div>
+                                <div class="member-score">
+                                    <strong>{{ "%.1f"|format(m.avg_score) }}</strong> / 5
+                                </div>
+                            </div>
+                            <div class="score-bar" data-score="{{ m.avg_score }}">
+                                <div class="score-fill"></div>
+                            </div>
+                            <div class="member-meta">
+                                共 {{ m.rating_count }} 次评价
+                            </div>
+                        </div>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- 右侧：操作区（评分 + 上传头像） -->
+        <section class="card">
+            <div class="card-title">
+                <h2>参与互动</h2>
+                <small>给别人打分 · 上传头像</small>
+            </div>
+
+            <!-- 评分表单 -->
+            <div class="form-card" style="margin-bottom: 16px;">
+                <div class="section-title">① 给别人打个分</div>
+
+                <div>
+                    <label for="rater-select">你是谁？</label>
+                    <select id="rater-select">
+                        <option value="">请选择你的身份</option>
+                        {% for m in members %}
+                            <option value="{{ m.id }}">{{ m.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="target-select">你要评价哪一位？</label>
+                    <select id="target-select">
+                        <option value="">请选择要评价的人</option>
+                        {% for m in members %}
+                            <option value="{{ m.id }}">{{ m.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="hint">不能给自己打分哦～</p>
+                </div>
+
+                <div>
+                    <label for="score-input">评分（1–5 分，整数）</label>
+                    <input id="score-input" type="number" min="1" max="5" placeholder="比如 5">
+                </div>
+
+                <div>
+                    <label for="comment-input">想顺便说点啥？（可选）</label>
+                    <textarea id="comment-input" placeholder="比如：今天状态在线，帅到犯规…"></textarea>
+                </div>
+
+                <div class="status" id="rate-status"></div>
+
+                <button class="btn btn-primary" id="rate-btn">
+                    提交评价
+                </button>
+            </div>
+
+            <!-- 上传头像表单 -->
+            <form class="form-card" action="/upload-avatar" method="post" enctype="multipart/form-data">
+                <div class="section-title">② 上传/更新你的头像</div>
+
+                <div>
+                    <label for="avatar-member">选择你是谁</label>
+                    <select id="avatar-member" name="member_id">
+                        {% for m in members %}
+                            <option value="{{ m.id }}">{{ m.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="avatar-file">选择头像图片（jpg / png / gif）</label>
+                    <input id="avatar-file" type="file" name="avatar" accept="image/*">
+                    <p class="hint">注意：这是简单教学项目，头像只会暂时存在服务器，不适合存特别重要的照片。</p>
+                </div>
+
+                <button class="btn btn-ghost" type="submit">
+                    上传 / 更新头像
+                </button>
+            </form>
+        </section>
     </div>
+</div>
 
-    <h2>大家的留言</h2>
-    <div id="messages"></div>
+<script>
+    async function submitRating() {
+        const raterSelect = document.getElementById("rater-select");
+        const targetSelect = document.getElementById("target-select");
+        const scoreInput = document.getElementById("score-input");
+        const commentInput = document.getElementById("comment-input");
+        const statusEl = document.getElementById("rate-status");
 
-    <script>
-        async function loadMessages() {
-            const res = await fetch("/api/messages");
-            const data = await res.json();
-            const container = document.getElementById("messages");
-            container.innerHTML = "";
-            data.forEach(msg => {
-                const div = document.createElement("div");
-                div.className = "message";
-                div.innerHTML = `
-                    <div class="meta">${msg.time} - ${msg.name}</div>
-                    <div class="text">${msg.text}</div>
-                `;
-                container.appendChild(div);
+        statusEl.textContent = "";
+        statusEl.className = "status";
+
+        const rater_id = raterSelect.value;
+        const target_id = targetSelect.value;
+        const score = scoreInput.value;
+        const comment = commentInput.value;
+
+        if (!rater_id) {
+            statusEl.textContent = "请先选择你是谁";
+            statusEl.classList.add("error");
+            return;
+        }
+        if (!target_id) {
+            statusEl.textContent = "请选择你要评价的人";
+            statusEl.classList.add("error");
+            return;
+        }
+        if (rater_id === target_id) {
+            statusEl.textContent = "不能给自己打分噢～";
+            statusEl.classList.add("error");
+            return;
+        }
+        if (!score || Number.isNaN(Number(score))) {
+            statusEl.textContent = "请输入 1–5 之间的整数分数";
+            statusEl.classList.add("error");
+            return;
+        }
+
+        try {
+            const res = await fetch("/rate", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    rater_id: Number(rater_id),
+                    target_id: Number(target_id),
+                    score: Number(score),
+                    comment: comment
+                })
             });
-        }
 
-        async function submitMessage() {
-            const name = document.getElementById("name").value;
-            const text = document.getElementById("text").value;
-            const status = document.getElementById("status");
-            status.textContent = "";
-
-            try {
-                const res = await fetch("/api/messages", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({ name, text })
-                });
-
-                if (!res.ok) {
-                    const err = await res.json();
-                    status.textContent = err.error || "提交失败";
-                    return;
-                }
-
-                document.getElementById("text").value = "";
-                await loadMessages();
-            } catch (e) {
-                status.textContent = "网络错误，请稍后再试";
+            const data = await res.json();
+            if (!res.ok) {
+                statusEl.textContent = data.error || "提交失败，请稍后再试";
+                statusEl.classList.add("error");
+                return;
             }
+
+            statusEl.textContent = "评价成功！排行榜已更新～";
+            statusEl.classList.add("ok");
+
+            scoreInput.value = "";
+            commentInput.value = "";
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 600);
+        } catch (e) {
+            statusEl.textContent = "网络异常，请稍后重试";
+            statusEl.classList.add("error");
         }
+    }
 
-        document.getElementById("submit").addEventListener("click", submitMessage);
+    document.getElementById("rate-btn").addEventListener("click", function (e) {
+        e.preventDefault();
+        submitRating();
+    });
 
-        // 进入页面时加载一次
-        loadMessages();
-    </script>
+    // 根据 data-score 设置进度条宽度
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".score-bar").forEach(function (bar) {
+            var score = parseFloat(bar.getAttribute("data-score") || "0");
+            var fill = bar.querySelector(".score-fill");
+            if (!fill) return;
+            var percent = 0;
+            if (!isNaN(score) && score > 0) {
+                percent = Math.max(0, Math.min(100, score / 5 * 100));
+            }
+            fill.style.width = percent + "%";
+        });
+    });
+</script>
 </body>
 </html>
