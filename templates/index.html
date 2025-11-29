@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>饽饽山评分表</title>
+    <title>饽饽山蠢驴评分表</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         :root {
@@ -21,7 +21,7 @@
 
         body {
             margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", systemui, sans-serif;
             background: var(--bg-gradient);
             color: var(--text-main);
             min-height: 100vh;
@@ -293,11 +293,6 @@
             font-weight: 600;
         }
 
-        .muted {
-            font-size: 0.78rem;
-            color: var(--text-sub);
-        }
-
         .status {
             font-size: 0.8rem;
             min-height: 16px;
@@ -323,11 +318,11 @@
     <header>
         <div class="badge">
             <div class="badge-dot"></div>
-            饽饽山 · 小团体专用评分榜
+            饽饽山 · 十头蠢驴专用评分榜
         </div>
-        <h1>饽饽山颜值 & 形象评分表</h1>
+        <h1>饽饽山蠢驴评分表</h1>
         <div class="subtitle">
-            每人都可以给别人打 1–5 分，上传自己的头像，一起打造最有仪式感的团体排行榜 ✨
+            每头蠢驴都可以给其他蠢驴打 1–5 分，上传自己的头像，看看谁是“最优质蠢驴” 🫏✨
         </div>
     </header>
 
@@ -335,7 +330,7 @@
         <!-- 左侧：排行榜 -->
         <section class="card">
             <div class="card-title">
-                <h2>当前排行榜</h2>
+                <h2>当前蠢驴排行榜</h2>
                 <small>按照平均分从高到低排列</small>
             </div>
             <div class="board-grid">
@@ -364,7 +359,7 @@
                                 <div class="score-fill"></div>
                             </div>
                             <div class="member-meta">
-                                共 {{ m.rating_count }} 次评价
+                                共 {{ m.rating_count }} 次“蠢驴认证”
                             </div>
                         </div>
                     </article>
@@ -376,15 +371,15 @@
         <section class="card">
             <div class="card-title">
                 <h2>参与互动</h2>
-                <small>给别人打分 · 上传头像</small>
+                <small>选出你心目中的顶级蠢驴</small>
             </div>
 
             <!-- 评分表单 -->
             <div class="form-card" style="margin-bottom: 16px;">
-                <div class="section-title">① 给别人打个分</div>
+                <div class="section-title">① 给其他蠢驴打个分</div>
 
                 <div>
-                    <label for="rater-select">你是谁？</label>
+                    <label for="rater-select">你是哪头蠢驴？</label>
                     <select id="rater-select">
                         <option value="">请选择你的身份</option>
                         {% for m in members %}
@@ -394,24 +389,24 @@
                 </div>
 
                 <div>
-                    <label for="target-select">你要评价哪一位？</label>
+                    <label for="target-select">你要评价哪一头蠢驴？</label>
                     <select id="target-select">
-                        <option value="">请选择要评价的人</option>
+                        <option value="">请选择要评价的对象</option>
                         {% for m in members %}
                             <option value="{{ m.id }}">{{ m.name }}</option>
                         {% endfor %}
                     </select>
-                    <p class="hint">不能给自己打分哦～</p>
+                    <p class="hint">友情提示：做人要诚实，不能给自己打分～</p>
                 </div>
 
                 <div>
-                    <label for="score-input">评分（1–5 分，整数）</label>
+                    <label for="score-input">蠢驴指数（1–5 分，整数）</label>
                     <input id="score-input" type="number" min="1" max="5" placeholder="比如 5">
                 </div>
 
                 <div>
-                    <label for="comment-input">想顺便说点啥？（可选）</label>
-                    <textarea id="comment-input" placeholder="比如：今天状态在线，帅到犯规…"></textarea>
+                    <label for="comment-input">顺便评价两句（可选）</label>
+                    <textarea id="comment-input" placeholder="例如：今天的表现非常蠢驴，值得满分…"></textarea>
                 </div>
 
                 <div class="status" id="rate-status"></div>
@@ -423,10 +418,10 @@
 
             <!-- 上传头像表单 -->
             <form class="form-card" action="/upload-avatar" method="post" enctype="multipart/form-data">
-                <div class="section-title">② 上传/更新你的头像</div>
+                <div class="section-title">② 上传 / 更新你的蠢驴头像</div>
 
                 <div>
-                    <label for="avatar-member">选择你是谁</label>
+                    <label for="avatar-member">选择你是哪头蠢驴</label>
                     <select id="avatar-member" name="member_id">
                         {% for m in members %}
                             <option value="{{ m.id }}">{{ m.name }}</option>
@@ -437,7 +432,7 @@
                 <div>
                     <label for="avatar-file">选择头像图片（jpg / png / gif）</label>
                     <input id="avatar-file" type="file" name="avatar" accept="image/*">
-                    <p class="hint">注意：这是简单教学项目，头像只会暂时存在服务器，不适合存特别重要的照片。</p>
+                    <p class="hint">注意：这是练习用的小网站，别传太隐私的照片就行～</p>
                 </div>
 
                 <button class="btn btn-ghost" type="submit">
@@ -465,17 +460,17 @@
         const comment = commentInput.value;
 
         if (!rater_id) {
-            statusEl.textContent = "请先选择你是谁";
+            statusEl.textContent = "请先选择你是哪头蠢驴";
             statusEl.classList.add("error");
             return;
         }
         if (!target_id) {
-            statusEl.textContent = "请选择你要评价的人";
+            statusEl.textContent = "请选择你要评价的蠢驴";
             statusEl.classList.add("error");
             return;
         }
         if (rater_id === target_id) {
-            statusEl.textContent = "不能给自己打分噢～";
+            statusEl.textContent = "不能给自己打分噢，要有一点自知之明 🫣";
             statusEl.classList.add("error");
             return;
         }
@@ -504,7 +499,7 @@
                 return;
             }
 
-            statusEl.textContent = "评价成功！排行榜已更新～";
+            statusEl.textContent = "评价成功！蠢驴排行榜已更新～";
             statusEl.classList.add("ok");
 
             scoreInput.value = "";
