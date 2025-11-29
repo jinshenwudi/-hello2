@@ -441,8 +441,36 @@
             </form>
         </section>
     </div>
-</div>
+    <!-- 全部评价记录 -->
+    <section class="card" style="margin-top: 18px;">
+        <div class="card-title">
+            <h2>全部评价记录</h2>
+            <small>最新的蠢驴发言在最前面</small>
+        </div>
 
+        {% if rating_list %}
+            <div class="rating-list">
+                {% for r in rating_list %}
+                    <article class="rating-item">
+                        <div class="rating-meta">
+                            <span class="rating-names">{{ r.rater_name }} → {{ r.target_name }}</span>
+                            <span class="rating-score">{{ r.score }} 分</span>
+                        </div>
+                        {% if r.comment %}
+                            <div class="rating-comment">{{ r.comment }}</div>
+                        {% endif %}
+                        {% if r.time %}
+                            <div class="rating-time">{{ r.time }}</div>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="muted">还没有任何评价记录，快去当第一头勇敢的蠢驴吧～</p>
+        {% endif %}
+    </section>
+</div>  <!-- page 结束 -->
+    
 <script>
     async function submitRating() {
         const raterSelect = document.getElementById("rater-select");
@@ -535,3 +563,4 @@
 </script>
 </body>
 </html>
+
