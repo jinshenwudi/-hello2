@@ -21,7 +21,7 @@
 
         body {
             margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", systemui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
             background: var(--bg-gradient);
             color: var(--text-main);
             min-height: 100vh;
@@ -213,6 +213,21 @@
             color: var(--text-sub);
         }
 
+        .member-signature {
+            margin-top: 4px;
+            font-size: 0.8rem;
+            color: #e5e7eb;
+            font-style: italic;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .member-signature.empty {
+            color: var(--text-sub);
+            font-style: normal;
+        }
+
         .form-card {
             display: flex;
             flex-direction: column;
@@ -229,7 +244,8 @@
         select,
         input[type="number"],
         textarea,
-        input[type="file"] {
+        input[type="file"],
+        input[type="text"] {
             width: 100%;
             font: inherit;
             padding: 7px 9px;
@@ -242,7 +258,8 @@
 
         select:focus,
         input[type="number"]:focus,
-        textarea:focus {
+        textarea:focus,
+        input[type="text"]:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.5);
         }
@@ -311,6 +328,53 @@
             color: var(--text-sub);
             margin-top: -4px;
         }
+
+        .muted {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .rating-list {
+            max-height: 320px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 4px;
+        }
+
+        .rating-item {
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            padding: 8px 10px;
+            background: radial-gradient(circle at top left, rgba(248, 113, 22, 0.12), rgba(15, 23, 42, 0.9));
+        }
+
+        .rating-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .rating-names {
+            font-weight: 500;
+        }
+
+        .rating-score {
+            color: #fed7aa;
+        }
+
+        .rating-comment {
+            font-size: 0.85rem;
+            margin-bottom: 2px;
+        }
+
+        .rating-time {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+        }
     </style>
 </head>
 <body>
@@ -322,7 +386,7 @@
         </div>
         <h1>饽饽山蠢驴评分表</h1>
         <div class="subtitle">
-            每头蠢驴都可以给其他蠢驴打 1–5 分，上传自己的头像，看看谁是“最优质蠢驴” 🫏✨
+            每头蠢驴都可以给其他蠢驴打 1–5 分，上传头像，写个性签名，看看谁是“顶级优质蠢驴” 🫏✨
         </div>
     </header>
 
@@ -361,17 +425,24 @@
                             <div class="member-meta">
                                 共 {{ m.rating_count }} 次“蠢驴认证”
                             </div>
+                            <div class="member-signature {% if not m.signature %}empty{% endif %}">
+                                {% if m.signature %}
+                                    “{{ m.signature }}”
+                                {% else %}
+                                    这头蠢驴还没有写签名～
+                                {% endif %}
+                            </div>
                         </div>
                     </article>
                 {% endfor %}
             </div>
         </section>
 
-        <!-- 右侧：操作区（评分 + 上传头像） -->
+        <!-- 右侧：操作区（评分 + 上传头像 + 设置签名） -->
         <section class="card">
             <div class="card-title">
                 <h2>参与互动</h2>
-                <small>选出你心目中的顶级蠢驴</small>
+                <small>打分 · 上传头像 · 个性签名</small>
             </div>
 
             <!-- 评分表单 -->
@@ -396,7 +467,7 @@
                             <option value="{{ m.id }}">{{ m.name }}</option>
                         {% endfor %}
                     </select>
-                    <p class="hint">友情提示：做人要诚实，不能给自己打分～</p>
+                    <p class="hint">友情提示：不能给自己打分～</p>
                 </div>
 
                 <div>
@@ -406,7 +477,7 @@
 
                 <div>
                     <label for="comment-input">顺便评价两句（可选）</label>
-                    <textarea id="comment-input" placeholder="例如：今天的表现非常蠢驴，值得满分…"></textarea>
+                    <textarea id="comment-input" placeholder="例如：今天表现非常蠢驴，值得满分…"></textarea>
                 </div>
 
                 <div class="status" id="rate-status"></div>
@@ -417,7 +488,7 @@
             </div>
 
             <!-- 上传头像表单 -->
-            <form class="form-card" action="/upload-avatar" method="post" enctype="multipart/form-data">
+            <form class="form-card" action="/upload-avatar" method="post" enctype="multipart/form-data" style="margin-bottom: 16px;">
                 <div class="section-title">② 上传 / 更新你的蠢驴头像</div>
 
                 <div>
@@ -439,8 +510,32 @@
                     上传 / 更新头像
                 </button>
             </form>
+
+            <!-- 个性签名表单 -->
+            <form class="form-card" action="/update-signature" method="post">
+                <div class="section-title">③ 设置 / 修改你的个性签名</div>
+
+                <div>
+                    <label for="signature-member">选择你是哪头蠢驴</label>
+                    <select id="signature-member" name="member_id">
+                        {% for m in members %}
+                            <option value="{{ m.id }}">{{ m.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="signature-input">个性签名（最多 80 个字）</label>
+                    <input id="signature-input" type="text" name="signature" placeholder="例如：本蠢驴今日也在认真犯蠢中…">
+                </div>
+
+                <button class="btn btn-ghost" type="submit">
+                    保存个性签名
+                </button>
+            </form>
         </section>
     </div>
+
     <!-- 全部评价记录 -->
     <section class="card" style="margin-top: 18px;">
         <div class="card-title">
@@ -469,8 +564,8 @@
             <p class="muted">还没有任何评价记录，快去当第一头勇敢的蠢驴吧～</p>
         {% endif %}
     </section>
-</div>  <!-- page 结束 -->
-    
+</div>
+
 <script>
     async function submitRating() {
         const raterSelect = document.getElementById("rater-select");
@@ -563,4 +658,3 @@
 </script>
 </body>
 </html>
-
