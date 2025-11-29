@@ -18,21 +18,28 @@ def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# ==== 饽饽山成员数据（你可以以后改名字） ====
+# ==== 饽饽山 10 个蠢驴，这里的 name 随便改成你们真实名字就行 ====
 members = [
-    {"id": 1, "name": "饽饽山 1号", "avatar": None},
-    {"id": 2, "name": "饽饽山 2号", "avatar": None},
-    {"id": 3, "name": "饽饽山 3号", "avatar": None},
-    {"id": 4, "name": "饽饽山 4号", "avatar": None},
-    {"id": 5, "name": "饽饽山 5号", "avatar": None},
-    {"id": 6, "name": "饽饽山 6号", "avatar": None},
-    {"id": 7, "name": "饽饽山 7号", "avatar": None},
-    {"id": 8, "name": "饽饽山 8号", "avatar": None},
-    {"id": 9, "name": "饽饽山 9号", "avatar": None},
-    {"id": 10, "name": "饽饽山 10号", "avatar": None},
+    {"id": 1, "name": "劲神"},
+    {"id": 2, "name": "任某"},
+    {"id": 3, "name": "刘某"},
+    {"id": 4, "name": "宋子晗"},
+    {"id": 5, "name": "张钧皓"},
+    {"id": 6, "name": "张连健"},
+    {"id": 7, "name": "张珈宁"},
+    {"id": 8, "name": "张立苳"},
+    {"id": 9, "name": "王晓萱"},
+    {"id": 10, "name": "贝东营"},
 ]
+# 👉 例如你可以改成：
+# members = [
+#     {"id": 1, "name": "小张"},
+#     {"id": 2, "name": "大王"},
+#     ...
+# ]
 
-# 评分统计：每个成员的总分和评分次数
+
+# 评分统计
 member_stats = {
     m["id"]: {"total_score": 0, "rating_count": 0}
     for m in members
@@ -89,11 +96,11 @@ def rate():
     comment = (data.get("comment") or "").strip()
 
     if rater_id not in [m["id"] for m in members]:
-        return jsonify({"error": "请选择你是谁"}), 400
+        return jsonify({"error": "请选择你是哪头蠢驴"}), 400
     if target_id not in [m["id"] for m in members]:
-        return jsonify({"error": "请选择要评价的人"}), 400
+        return jsonify({"error": "请选择你要评价的那头蠢驴"}), 400
     if rater_id == target_id:
-        return jsonify({"error": "不能给自己打分噢"}), 400
+        return jsonify({"error": "不能给自己打分噢，做人要诚实 🫢"}), 400
     if score < 1 or score > 5:
         return jsonify({"error": "评分必须在 1 到 5 之间"}), 400
 
