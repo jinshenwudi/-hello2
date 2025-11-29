@@ -1,5 +1,6 @@
 import os
 from uuid import uuid4
+from datetime import datetime
 
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from werkzeug.utils import secure_filename
@@ -18,20 +19,19 @@ def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# ==== 饽饽山 10 位成员：这里只改名字就行，avatar 先设为 None ====
+# ==== 饽饽山 10 位成员：加上个性签名 signature ====
 members = [
-    {"id": 1, "name": "劲神",   "avatar": None},
-    {"id": 2, "name": "任某",   "avatar": None},
-    {"id": 3, "name": "刘某",   "avatar": None},
-    {"id": 4, "name": "宋子晗", "avatar": None},
-    {"id": 5, "name": "张钧皓", "avatar": None},
-    {"id": 6, "name": "张连健", "avatar": None},
-    {"id": 7, "name": "张珈宁", "avatar": None},
-    {"id": 8, "name": "张立苳", "avatar": None},
-    {"id": 9, "name": "王晓萱", "avatar": None},
-    {"id": 10, "name": "贝东莹", "avatar": None},
+    {"id": 1, "name": "劲神",   "avatar": None, "signature": ""},
+    {"id": 2, "name": "任某",   "avatar": None, "signature": ""},
+    {"id": 3, "name": "刘某",   "avatar": None, "signature": ""},
+    {"id": 4, "name": "宋子晗", "avatar": None, "signature": ""},
+    {"id": 5, "name": "张钧皓", "avatar": None, "signature": ""},
+    {"id": 6, "name": "张连健", "avatar": None, "signature": ""},
+    {"id": 7, "name": "张珈宁", "avatar": None, "signature": ""},
+    {"id": 8, "name": "张立苳", "avatar": None, "signature": ""},
+    {"id": 9, "name": "王晓萱", "avatar": None, "signature": ""},
+    {"id": 10, "name": "贝东莹", "avatar": None, "signature": ""},
 ]
-
 
 # 评分统计：每个人的总分和次数
 member_stats = {
@@ -39,8 +39,7 @@ member_stats = {
     for m in members
 }
 
-# 保存所有评价记录（目前只是内存，不写数据库）
-# 每条: {rater_id, target_id, score, comment}
+# 保存所有评价记录：每条 {rater_id, target_id, score, comment, time}
 ratings = []
 
 
@@ -63,6 +62,7 @@ def build_board_data():
                 "id": m["id"],
                 "name": m["name"],
                 "avatar": m["avatar"],
+                "signature": m.get("signature", ""),
                 "avg_score": round(avg, 2),
                 "rating_count": count,
             }
@@ -75,7 +75,28 @@ def build_board_data():
 @app.route("/")
 def index():
     board = build_board_data()
-    return render_template("index.html", members=members, board=board)
+
+    # 把评价记录整理一下传给模板（最新的在最前面）
+    rating_list = []
+    for r in reversed(ratings):
+        rater = get_member(r["rater_id"])
+        target = get_member(r["target_id"])
+        rating_list.append(
+            {
+                "rater_name": rater["name"] if rater else f"ID {r['rater_id']}",
+                "target_name": target["name"] if target else f"ID {r['target_id']}",
+                "score": r["score"],
+                "comment": r.get("comment", ""),
+                "time": r.get("time", ""),
+            }
+        )
+
+    return render_template(
+        "index.html",
+        members=members,
+        board=board,
+        rating_list=rating_list,
+    )
 
 
 @app.route("/rate", methods=["POST"])
@@ -107,6 +128,7 @@ def rate():
             "target_id": target_id,
             "score": score,
             "comment": comment,
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         }
     )
 
@@ -145,6 +167,30 @@ def upload_avatar():
 
     # 设置该成员的头像 URL
     member["avatar"] = f"/static/avatars/{new_name}"
+
+    return redirect(url_for("index"))
+
+
+@app.route("/update-signature", methods=["POST"])
+def update_signature():
+    """更新个人个性签名"""
+    member_id = request.form.get("member_id")
+    signature = (request.form.get("signature") or "").strip()
+
+    # 限制长度，避免太长
+    if len(signature) > 80:
+        signature = signature[:80]
+
+    try:
+        member_id = int(member_id)
+    except (TypeError, ValueError):
+        return redirect(url_for("index"))
+
+    member = get_member(member_id)
+    if not member:
+        return redirect(url_for("index"))
+
+    member["signature"] = signature
 
     return redirect(url_for("index"))
 
